@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://unpkg.com/alpinejs" defer></script>
+        <title>Formulaire d'inscription</title>
+    </head>
+  
+<div>
+    <h1>valise</h1>
+      <body x-data="{valise: ['apple'], nexItem: ''}">
+    
+                
+                <input type="text" x-model="">
+                <span class="error" x-show="errors.name" x-text="errors.name"></span>
+                <button @click="addName">Ajouter</button>
+                <button @click="resetForm">Réinitialiser</button>
+            </div>
+            <ul>
+                <template x-for="item in names" :key="item">
+                    <li x-text="item"></li>
+                </template>
+            </ul>
+        </div>
+        
+
+    </script>
+</body>
+</html>

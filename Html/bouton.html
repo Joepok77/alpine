@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filtre de Recherche</title>
+    
+</head>
+<body>
+    <div x-data="{
+        search : '',
+        items: ['foo', 'bar',  'baz'],
+        get filteredItems(){
+            return this.items.filter(
+                i => i.startsWith(this.search)
+            )
+        }
+    }">
+    <input x-model="search" placeholder="search...">
+    <ul>
+        <template x-for="item in filteredItems" :key="Item">
+            <li x-text="item"> </li>
+        </template>
+    </ul>
+    </div>
+
+        
+    </body>
+</html>
+
