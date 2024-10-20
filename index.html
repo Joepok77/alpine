@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.0.0/dist/cdn.min.js" defer></script>
+    <style>
+        .hidden {
+            display: none;
+        }
+
+        .visible {
+            display: block;
+        }
+
+        .rectangle {
+            width: 100px;
+            height: 50px;
+            background-color: lightgray;
+            margin: 10px;
+        }
+
+        .correct {
+            background-color: green;
+            color: white;
+        }
+
+        .incorrect {
+            background-color: red;
+            color: white;
+        }
+
+        .button {
+            padding: 10px 15px;
+            margin: 5px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div x-data="quizApp()" class="quiz-container" style="text-align: center;">
+        <!-- Affichage de la question -->
+        <div>
+            <h2 x-text="currentQuestion.question" x-show="quizStarted"></h2>
+        </div>
+
+        <!-- Réponses -->
+        <div>
+            <template x-if="quizStarted">
+                <template x-for="(choice, index) in currentQuestion.choices" :key="index">
+                    <button :class="{'correct': answered && index === currentQuestion.correctIndex, 'incorrect': answered && index !== currentQuestion.correctIndex && index !== currentQuestion.correctIndex}" 
+                        @click="checkAnswer(index)" 
+                        x-text="choice" 
+                        class="button"></button>
+                </template>
+            </template>
+        </div>
+
+        <!-- Statistiques et compteurs -->
+        <div>
+            <p x-show="quizStarted">Bonnes réponses : <span x-text="correctCount"></span></p>
+            <p x-show="quizStarted">Mauvaises réponses : <span x-text="incorrectCount"></span></p>
+        </div>
+
+        <!-- Boutons -->
+        <button x-show="!quizStarted" @click="start()" class="button">Commencer</button>
+        <button x-show="quizEnded" @click="restart()" class="button">Recommencer</button>
+    </div>
+
+    <script>
+        function quizApp() {
+            return {
+                questions: [
+                    { question: 'Traduis "corner" en français.', correctIndex: 0, choices: ['coin', 'pièce', 'angle'] },
+                    { question: 'Traduis "silent" en français.', correctIndex: 0, choices: ['silencieux', 'muet', 'tranquille'] },
+                    { question: 'Traduis "current" en français.', correctIndex: 0, choices: ['courant', 'actuel', 'flux'] },
+                    { question: 'Traduis "bottle" en français.', correctIndex: 0, choices: ['bouteille', 'flacon', 'récipient'] },
+                    { question: 'Traduis "presume" en français.', correctIndex: 1, choices: ['supposer', 'présumer', 'estimer'] },
+                    { question: 'Traduis "visitor" en français.', correctIndex: 0, choices: ['visiteur', 'invité', 'hôte'] },
+                    { question: 'Traduis "local" en français.', correctIndex: 0, choices: ['local', 'endroit', 'régional'] },
+                    { question: 'Traduis "novel" en français.', correctIndex: 0, choices: ['roman', 'nouveauté', 'original'] },
+                    { question: 'Traduis "advance" en français.', correctIndex: 0, choices: ['avance', 'progrès', 'retourner'] },
+                    { question: 'Traduis "content" en français.', correctIndex: 0, choices: ['contenu', 'satisfait', 'sujet'] },
+                    { question: 'Traduis "exciting" en français.', correctIndex: 0, choices: ['excitant', 'passionnant', 'stimulant'] },
+                    { question: 'Traduis "divide" en français.', correctIndex: 0, choices: ['diviser', 'séparer', 'partager'] },
+                    { question: 'Traduis "refrain" en français.', correctIndex: 0, choices: ['refrain', 's\'abstenir', 'refrain'] },
+                    { question: 'Traduis "peculiar" en français.', correctIndex: 0, choices: ['particulier', 'étrange', 'spécial'] },
+                    { question: 'Traduis "effective" en français.', correctIndex: 1, choices: ['effectif', 'efficace', 'effectuer'] },
+                    { question: 'Traduis "dangerous" en français.', correctIndex: 0, choices: ['dangereux', 'risqué', 'périlleux'] },
+                    { question: 'Traduis "obvious" en français.', correctIndex: 0, choices: ['évident', 'clair', 'flagrant'] }
+                ],
+                currentQuestion: {},
+                quizStarted: false,
+                quizEnded: false,
+                correctCount: 0,
+                incorrectCount: 0,
+                answered: false,
+                currentIndex: 0,
+
+                start() {
+                    this.correctCount = 0;
+                    this.incorrectCount = 0;
+                    this.quizEnded = false;
+                    this.currentIndex = 0;
+                    this.answered = false;
+                    this.quizStarted = true;
+                    this.nextQuestion();
+                },
+
+                nextQuestion() {
+                    if (this.currentIndex < this.questions.length) {
+                        this.currentQuestion = this.questions[this.currentIndex];
+                        this.answered = false; // Reset answered state for the next question
+                    } else {
+                        this.quizEnded = true; // Set quiz as ended
+                        this.quizStarted = false; // Reset quizStarted for the recommencer button
+                    }
+                },
+
+                checkAnswer(index) {
+                    this.answered = true; // Mark as answered
+                    if (index === this.currentQuestion.correctIndex) {
+                        this.correctCount++; // Increment correct count
+                    } else {
+                        this.incorrectCount++; // Increment incorrect count
+                    }
+                    setTimeout(() => {
+                        this.currentIndex++; // Move to next question
+                        this.nextQuestion(); // Get the next question
+                    }, 1000); // Delay for effect
+                },
+
+                restart() {
+                    this.start(); // Restart the quiz
+                }
+            };
+        }
+    </script>
+</body>
+
+</html>
