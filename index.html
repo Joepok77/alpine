@@ -181,6 +181,7 @@
         isFinished: false,
         get currentQuestion() {
           return this.questions[this.currentQuestionIndex];
+          
         },
         selectAnswer(answer) {
   if (!this.selected) {
@@ -202,7 +203,7 @@
         },
         nextQuestion() {
           this.selected = null;
-          this.currentQuestionIndex++;
+          this.currentQuestionIndex = Math.floor(Math.random() * this.questions.length);
           if (this.currentQuestionIndex >= this.questions.length) {
             this.isFinished = true;
           }
@@ -214,6 +215,7 @@
           this.correctCount = 0;
           this.selected = null;
           this.isFinished = false;
+          this.nextQuestion()
         }
       };
     }
