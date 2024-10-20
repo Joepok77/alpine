@@ -1,144 +1,222 @@
 <!DOCTYPE html>
-<html lang="fr">
-
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz</title>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.0.0/dist/cdn.min.js" defer></script>
-    <style>
-        .hidden {
-            display: none;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <title>Quiz en Alpine.js</title>
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
 
-        .visible {
-            display: block;
-        }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 50px;
+      background-color: #f4f4f4;
+    }
 
-        .rectangle {
-            width: 100px;
-            height: 50px;
-            background-color: lightgray;
-            margin: 10px;
-        }
+    .quiz-container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
 
-        .correct {
-            background-color: green;
-            color: white;
-        }
+    button {
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
 
-        .incorrect {
-            background-color: red;
-            color: white;
-        }
+    button.correct {
+      background-color: green;
+      color: white;
+    }
 
-        .button {
-            padding: 10px 15px;
-            margin: 5px;
-            font-size: 16px;
-        }
-    </style>
+    button.incorrect {
+      background-color: red;
+      color: white;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    /* Style pour les images des coeurs */
+    .heart {
+      width: 30px;
+      height: 30px;
+      margin: 5px;
+    }
+
+    .hearts-container {
+      margin-top: 20px;
+    }
+  </style>
 </head>
-
 <body>
-    <div x-data="quizApp()" class="quiz-container" style="text-align: center;">
-        <!-- Affichage de la question -->
-        <div>
-            <h2 x-text="currentQuestion.question" x-show="quizStarted"></h2>
-        </div>
+  <div class="quiz-container" x-data="quizApp()">
+    <div x-show="!isFinished">
+      <h2 x-text="currentQuestion.question"></h2>
+      <div>
+        <button :class="{'correct': selected === 'a' && isCorrect('a'), 'incorrect': selected === 'a' && !isCorrect('a')}"
+                @click="selectAnswer('a')" 
+                x-text="currentQuestion.answers[0]"></button>
+      </div>
+      <div>
+        <button :class="{'correct': selected === 'b' && isCorrect('b'), 'incorrect': selected === 'b' && !isCorrect('b')}"
+                @click="selectAnswer('b')" 
+                x-text="currentQuestion.answers[1]"></button>
+      </div>
+      <div>
+        <button :class="{'correct': selected === 'c' && isCorrect('c'), 'incorrect': selected === 'c' && !isCorrect('c')}"
+                @click="selectAnswer('c')" 
+                x-text="currentQuestion.answers[2]"></button>
+      </div>
+      <button x-show="selected" @click="nextQuestion()">Question suivante</button>
 
-        <!-- Réponses -->
-        <div>
-            <template x-if="quizStarted">
-                <template x-for="(choice, index) in currentQuestion.choices" :key="index">
-                    <button :class="{'correct': answered && index === currentQuestion.correctIndex, 'incorrect': answered && index !== currentQuestion.correctIndex && index !== currentQuestion.correctIndex}" 
-                        @click="checkAnswer(index)" 
-                        x-text="choice" 
-                        class="button"></button>
-                </template>
-            </template>
-        </div>
-
-        <!-- Statistiques et compteurs -->
-        <div>
-            <p x-show="quizStarted">Bonnes réponses : <span x-text="correctCount"></span></p>
-            <p x-show="quizStarted">Mauvaises réponses : <span x-text="incorrectCount"></span></p>
-        </div>
-
-        <!-- Boutons -->
-        <button x-show="!quizStarted" @click="start()" class="button">Commencer</button>
-        <button x-show="quizEnded" @click="restart()" class="button">Recommencer</button>
+      <!-- Conteneur pour afficher les coeurs -->
+      <div class="hearts-container">
+        <!-- Chemin corrigé pour accéder aux images dans le dossier "images" -->
+        <template x-for="i in 5" :key="i">
+          <img :src="i <= correctCount ? 'image/coeur.jpg' : 'image/coeur_vide.png'" alt="coeur" class="heart">
+        </template>
+      </div>
     </div>
 
-    <script>
-        function quizApp() {
-            return {
-                questions: [
-                    { question: 'Traduis "corner" en français.', correctIndex: 0, choices: ['coin', 'pièce', 'angle'] },
-                    { question: 'Traduis "silent" en français.', correctIndex: 0, choices: ['silencieux', 'muet', 'tranquille'] },
-                    { question: 'Traduis "current" en français.', correctIndex: 0, choices: ['courant', 'actuel', 'flux'] },
-                    { question: 'Traduis "bottle" en français.', correctIndex: 0, choices: ['bouteille', 'flacon', 'récipient'] },
-                    { question: 'Traduis "presume" en français.', correctIndex: 1, choices: ['supposer', 'présumer', 'estimer'] },
-                    { question: 'Traduis "visitor" en français.', correctIndex: 0, choices: ['visiteur', 'invité', 'hôte'] },
-                    { question: 'Traduis "local" en français.', correctIndex: 0, choices: ['local', 'endroit', 'régional'] },
-                    { question: 'Traduis "novel" en français.', correctIndex: 0, choices: ['roman', 'nouveauté', 'original'] },
-                    { question: 'Traduis "advance" en français.', correctIndex: 0, choices: ['avance', 'progrès', 'retourner'] },
-                    { question: 'Traduis "content" en français.', correctIndex: 0, choices: ['contenu', 'satisfait', 'sujet'] },
-                    { question: 'Traduis "exciting" en français.', correctIndex: 0, choices: ['excitant', 'passionnant', 'stimulant'] },
-                    { question: 'Traduis "divide" en français.', correctIndex: 0, choices: ['diviser', 'séparer', 'partager'] },
-                    { question: 'Traduis "refrain" en français.', correctIndex: 0, choices: ['refrain', 's\'abstenir', 'refrain'] },
-                    { question: 'Traduis "peculiar" en français.', correctIndex: 0, choices: ['particulier', 'étrange', 'spécial'] },
-                    { question: 'Traduis "effective" en français.', correctIndex: 1, choices: ['effectif', 'efficace', 'effectuer'] },
-                    { question: 'Traduis "dangerous" en français.', correctIndex: 0, choices: ['dangereux', 'risqué', 'périlleux'] },
-                    { question: 'Traduis "obvious" en français.', correctIndex: 0, choices: ['évident', 'clair', 'flagrant'] }
-                ],
-                currentQuestion: {},
-                quizStarted: false,
-                quizEnded: false,
-                correctCount: 0,
-                incorrectCount: 0,
-                answered: false,
-                currentIndex: 0,
+    <div x-show="isFinished">
+      <h2>Quiz terminé !</h2>
+      <p>Vous avez répondu correctement à <span x-text="correctCount"></span> questions sur 5.</p>
+      <button @click="restartQuiz()">Recommencer</button>
+    </div>
+  </div>
 
-                start() {
-                    this.correctCount = 0;
-                    this.incorrectCount = 0;
-                    this.quizEnded = false;
-                    this.currentIndex = 0;
-                    this.answered = false;
-                    this.quizStarted = true;
-                    this.nextQuestion();
-                },
+  <script>
+    function quizApp() {
+      return {
+        questions: [
+          { question: 'Traduis "corner" en français.', correct: 'a', answers: ['coin', 'pièce', 'angle'] },
+          { question: 'Traduis "silent" en français.', correct: 'a', answers: ['silencieux', 'muet', 'tranquille'] },
+          { question: 'Traduis "bottle" en français.', correct: 'a', answers: ['bouteille', 'flacon', 'récipient'] },
+          { question: 'Traduis "car" en français.', correct: 'a', answers: ['voiture', 'chaise', 'eau'] },
+          { question: 'Traduis "tree" en français.', correct: 'a', answers: ['arbre', 'nuage', 'vent'] },
+          { question: 'Traduis "book" en français.', correct: 'a', answers: ['livre', 'feu', 'poisson'] },
+          { question: 'Traduis "computer" en français.', correct: 'a', answers: ['ordinateur', 'oiseau', 'lait'] },
+          { question: 'Traduis "table" en français.', correct: 'b', answers: ['chaise', 'table', 'orange'] },
+          { question: 'Traduis "chair" en français.', correct: 'c', answers: ['maison', 'chien', 'chaise'] },
+          { question: 'Traduis "sun" en français.', correct: 'a', answers: ['soleil', 'pluie', 'ciel'] },
+          { question: 'Traduis "moon" en français.', correct: 'b', answers: ['maison', 'lune', 'arbre'] },
+          { question: 'Traduis "sky" en français.', correct: 'b', answers: ['vent', 'ciel', 'terre'] },
+          { question: 'Traduis "water" en français.', correct: 'a', answers: ['eau', 'feu', 'livre'] },
+          { question: 'Traduis "fire" en français.', correct: 'b', answers: ['oiseau', 'feu', 'nuage'] },
+          { question: 'Traduis "earth" en français.', correct: 'a', answers: ['terre', 'fruit', 'poisson'] },
+          { question: 'Traduis "wind" en français.', correct: 'a', answers: ['vent', 'eau', 'feu'] },
+          { question: 'Traduis "rain" en français.', correct: 'b', answers: ['chat', 'pluie', 'feu'] },
+          { question: 'Traduis "snow" en français.', correct: 'a', answers: ['neige', 'fleur', 'feu'] },
+          { question: 'Traduis "cloud" en français.', correct: 'a', answers: ['nuage', 'fraise', 'feu'] },
+          { question: 'Traduis "flower" en français.', correct: 'b', answers: ['fruit', 'fleur', 'arbre'] },
+          { question: 'Traduis "bird" en français.', correct: 'b', answers: ['fleur', 'oiseau', 'chien'] },
+          { question: 'Traduis "fish" en français.', correct: 'a', answers: ['poisson', 'lait', 'maison'] },
+          { question: 'Traduis "apple" en français.', correct: 'c', answers: ['poisson', 'chaise', 'pomme'] },
+          { question: 'Traduis "banana" en français.', correct: 'b', answers: ['voiture', 'banane', 'chien'] },
+          { question: 'Traduis "orange" en français.', correct: 'c', answers: ['chaise', 'voiture', 'orange'] },
+          { question: 'Traduis "lemon" en français.', correct: 'b', answers: ['fraise', 'citron', 'chat'] },
+          { question: 'Traduis "strawberry" en français.', correct: 'b', answers: ['citron', 'fraise', 'chaise'] },
+          { question: 'Traduis "grape" en français.', correct: 'a', answers: ['raisin', 'pain', 'livre'] },
+          { question: 'Traduis "milk" en français.', correct: 'a', answers: ['lait', 'eau', 'chien'] },
+          { question: 'Traduis "bread" en français.', correct: 'a', answers: ['pain', 'fruit', 'nuage'] },
+          { question: 'Traduis "cheese" en français.', correct: 'c', answers: ['maison', 'jus', 'fromage'] },
+          { question: 'Traduis "egg" en français.', correct: 'b', answers: ['dormir', 'oeuf', 'poisson'] },
+          { question: 'Traduis "meat" en français.', correct: 'a', answers: ['viande', 'chaise', 'eau'] },
+          { question: 'Traduis "vegetable" en français.', correct: 'a', answers: ['légume', 'sel', 'lait'] },
+          { question: 'Traduis "fruit" en français.', correct: 'a', answers: ['fruit', 'descendre', 'chien'] },
+          { question: 'Traduis "juice" en français.', correct: 'b', answers: ['lait', 'jus', 'voiture'] },
+          { question: 'Traduis "coffee" en français.', correct: 'a', answers: ['café', 'huile', 'voiture'] },
+          { question: 'Traduis "tea" en français.', correct: 'b', answers: ['arbre', 'thé', 'ciel'] },
+          { question: 'Traduis "sugar" en français.', correct: 'c', answers: ['livre', 'chaise', 'sucre'] },
+          { question: 'Traduis "salt" en français.', correct: 'a', answers: ['sel', 'poivre', 'voiture'] },
+          { question: 'Traduis "pepper" en français.', correct: 'b', answers: ['sel', 'poivre', 'chien'] },
+          { question: 'Traduis "butter" en français.', correct: 'b', answers: ['lait', 'beurre', 'poisson'] },
+          { question: 'Traduis "oil" en français.', correct: 'a', answers: ['huile', 'livre', 'chien'] },
+          { question: 'Traduis "knife" en français.', correct: 'a', answers: ['couteau', 'table', 'livre'] },
+          { question: 'Traduis "fork" en français.', correct: 'a', answers: ['fourchette', 'chaise', 'voiture'] },
+          { question: 'Traduis "spoon" en français.', correct: 'a', answers: ['cuillère', 'chat', 'arbre'] },
+          { question: 'Traduis "plate" en français.', correct: 'a', answers: ['assiette', 'livre', 'poisson'] },
+          { question: 'Traduis "cup" en français.', correct: 'a', answers: ['tasse', 'lait', 'maison'] },
+          { question: 'Traduis "glass" en français.', correct: 'a', answers: ['verre', 'fruit', 'voiture'] },
+          { question: 'Traduis "napkin" en français.', correct: 'a', answers: ['serviette', 'poisson', 'chien'] },
+          { question: 'Traduis "Bonjour" en anglais.', correct: 'b', answers: ['Hi', 'Hello', 'Goodbye'] },
+          { question: 'Traduis "Chat" en anglais.', correct: 'a', answers: ['Cat', 'Dog', 'Fish'] },
+          { question: 'Traduis "Pomme" en anglais.', correct: 'a', answers: ['Apple', 'Banana', 'Orange'] },
+          { question: 'Traduis "École" en anglais.', correct: 'c', answers: ['Playground', 'love', 'School'] },
+          { question: 'Traduis "Livre" en anglais.', correct: 'c', answers: ['movie', 'Magazine', 'Book'] },
+          { question: 'Traduis "Maison" en anglais.', correct: 'b', answers: ['Tree', 'house', 'Car'] },
+          { question: 'Traduis "Soleil" en anglais.', correct: 'a', answers: ['Sun', 'Coffee', 'Moon'] },
+          { question: 'Traduis "Fleur" en anglais.', correct: 'a', answers: ['Flower', 'Water', 'Coffee'] },
+          { question: 'Traduis "Rouge" en anglais.', correct: 'a', answers: ['Red', 'Green', 'yellow'] },
+          { question: 'Traduis "Rire" en anglais.', correct: 'c', answers: ['love', 'Cry', 'Laugh'] },
+          { question: 'Traduis "Manger" en anglais.', correct: 'a', answers: ['Eat', 'Run', 'eate'] },
+          { question: 'Traduis "Dormir" en anglais.', correct: 'a', answers: ['Sleep', 'Butterfly', 'Dance'] },
+          { question: 'Traduis "Chien" en anglais.', correct: 'c', answers: ['Elephant', 'Cow', 'Dog'] },
+          { question: 'Traduis "Chaton" en anglais.', correct: 'a', answers: ['Kitten', 'Lion', 'cat'] },
+          { question: 'Traduis "Sourire" en anglais.', correct: 'c', answers: ['Rainbow', 'Cry', 'Smile'] },
+        ],
+        currentQuestionIndex: 0,
+        selected: null,
+        correctCount: 0,
+	questionCount: 0,
+        isFinished: false,
+        get currentQuestion() {
+          return this.questions[this.currentQuestionIndex];
+        },
+        selectAnswer(answer) {
+  if (!this.selected) {
+    this.selected = answer;
+    if (this.isCorrect(answer)) {
+      this.correctCount++; // Incrémente les bonnes réponses
+    }
+    this.questionCount++; // Incrémente le nombre de questions posées
 
-                nextQuestion() {
-                    if (this.currentIndex < this.questions.length) {
-                        this.currentQuestion = this.questions[this.currentIndex];
-                        this.answered = false; // Reset answered state for the next question
-                    } else {
-                        this.quizEnded = true; // Set quiz as ended
-                        this.quizStarted = false; // Reset quizStarted for the recommencer button
-                    }
-                },
+    // Condition d'arrêt : 5 bonnes réponses ou 10 questions posées
+    if (this.correctCount >= 5 || this.questionCount >= 10) {
+      this.isFinished = true;
+    }
+  }
+},
 
-                checkAnswer(index) {
-                    this.answered = true; // Mark as answered
-                    if (index === this.currentQuestion.correctIndex) {
-                        this.correctCount++; // Increment correct count
-                    } else {
-                        this.incorrectCount++; // Increment incorrect count
-                    }
-                    setTimeout(() => {
-                        this.currentIndex++; // Move to next question
-                        this.nextQuestion(); // Get the next question
-                    }, 1000); // Delay for effect
-                },
-
-                restart() {
-                    this.start(); // Restart the quiz
-                }
-            };
+        isCorrect(answer) {
+          return answer === this.currentQuestion.correct;
+        },
+        nextQuestion() {
+          this.selected = null;
+          this.currentQuestionIndex++;
+          if (this.currentQuestionIndex >= this.questions.length) {
+            this.isFinished = true;
+          }
+        },
+        restartQuiz() {
+	
+  	  this.questionCount = 0; // Réinitialise le compteur de questions
+          this.currentQuestionIndex = 0;
+          this.correctCount = 0;
+          this.selected = null;
+          this.isFinished = false;
         }
-    </script>
+      };
+    }
+  </script>
 </body>
-
 </html>

@@ -26,6 +26,8 @@ var coeur7 = document.getElementById("obj403_img");
 var coeur8 = document.getElementById("obj405_img");
 var coeur9 = document.getElementById("obj407_img");
 var coeur10 = document.getElementById("obj391_img");
+ 
+
 
 
 Tab_Phrases_3[1] = new Array("1", 'Traduis "corner" en français.', 'a', 'coin', 'pièce', 'angle');
@@ -56,7 +58,7 @@ Tab_Phrases_3[17] = new Array ("17", 'Traduis "obvious" en français.', 'a', 'é
     
 }
   
-    if (compteur < 20) {
+    if (compteur < 10) {
         
     var question = getRandomInt(1, 100);
     if (niveau == "facile"){
