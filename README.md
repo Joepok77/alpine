@@ -19,10 +19,10 @@ Le quiz s'arrête également si l'utilisateur obtient 5 bonnes réponses.
 # Structure des questions
 - Les questions sont stockées sous forme d'un tableau d'objets JavaScript. Chaque objet contient :
 
-question : La question posée à l'utilisateur.
-correct : La lettre correspondant à la bonne réponse (a, b ou c).
-answers : Un tableau contenant trois réponses possibles.
-Exemple de structure de question :
+- question : La question posée à l'utilisateur.
+- correct : La lettre correspondant à la bonne réponse (a, b ou c).
+- answers : Un tableau contenant trois réponses possibles.
+- Exemple de structure de question :
 javascript
 
 {
