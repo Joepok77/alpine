@@ -1,5 +1,6 @@
 # Quiz en Alpine.js
-Ce projet est un quiz simple créé avec Alpine.js et HTML/CSS. Le but du quiz est de poser des questions à l'utilisateur, et celui-ci doit sélectionner la bonne réponse parmi trois propositions. 
+Ce projet est un quiz simple créé avec Alpine.js et HTML/CSS. 
+Le but du quiz est de poser des questions à l'utilisateur, et celui-ci doit sélectionner la bonne réponse parmi trois propositions. 
 Le quiz s'arrête automatiquement après 10 questions ou lorsque l'utilisateur obtient 5 bonnes réponses.
 
 # Fonctionnalités
