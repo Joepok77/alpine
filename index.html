@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <title>Quiz en Alpine.js</title>
+
   <style>
     body, html {
       height: 100%;
@@ -67,43 +68,50 @@
     }
   </style>
 </head>
-<body>
-  <div class="quiz-container" x-data="quizApp()">
-    <div x-show="!isFinished">
-      <h2 x-text="currentQuestion.question"></h2>
-      <div>
-        <button :class="{'correct': selected === 'a' && isCorrect('a'), 'incorrect': selected === 'a' && !isCorrect('a')}"
-                @click="selectAnswer('a')" 
-                x-text="currentQuestion.answers[0]"></button>
-      </div>
-      <div>
-        <button :class="{'correct': selected === 'b' && isCorrect('b'), 'incorrect': selected === 'b' && !isCorrect('b')}"
-                @click="selectAnswer('b')" 
-                x-text="currentQuestion.answers[1]"></button>
-      </div>
-      <div>
-        <button :class="{'correct': selected === 'c' && isCorrect('c'), 'incorrect': selected === 'c' && !isCorrect('c')}"
-                @click="selectAnswer('c')" 
-                x-text="currentQuestion.answers[2]"></button>
-      </div>
-      <button x-show="selected" @click="nextQuestion()">Question suivante</button>
+<!-- quizApp va etre rappele plus tard pour le js -->
+<div class="quiz-container" x-data="quizApp()">
+  <!-- tant que le quizz n'est pas fini cela affiche la question actuelle -->
+  <div x-show="!estFini">
+    <!-- Affiche la question actuelle -->
+    <h2 x-text="questionActuelle.question"></h2>
+    
+    <!-- Affiche les trois boutons de réponses possibles -->
+    <!--  vérifie si l'utilisateur a sélectionné la réponse "a", et si la réponse "a" est correcte.. -->
+<div>
+  <button :class="{'correct': selectionnee === 'a' && estCorrect('a'), 'incorrect': selectionnee === 'a' && !estCorrect('a')}"
+          @click="selectionnerReponse('a')" 
+          x-text="questionActuelle.answers[0]"></button>
+</div>
+<div>
+  <button :class="{'correct': selectionnee === 'b' && estCorrect('b'), 'incorrect': selectionnee === 'b' && !estCorrect('b')}"
+          @click="selectionnerReponse('b')" 
+          x-text="questionActuelle.answers[1]"></button>
+</div>
+<div>
+  <button :class="{'correct': selectionnee === 'c' && estCorrect('c'), 'incorrect': selectionnee === 'c' && !estCorrect('c')}"
+          @click="selectionnerReponse('c')" 
+          x-text="questionActuelle.answers[2]"></button>
+</div>
 
-      <!-- Conteneur pour afficher les coeurs -->
-      <div class="hearts-container">
-        <!-- Chemin corrigé pour accéder aux images dans le dossier "images" -->
-        <template x-for="i in 5" :key="i">
-          <img :src="i <= correctCount ? 'image/coeur.jpg' : 'image/coeur_vide.png'" alt="coeur" class="heart">
-        </template>
-      </div>
-    </div>
+    <!-- Bouton pour passer à la question suivante -->
+    <button x-show="selectionnee" @click="questionSuivante()">Question suivante</button>
 
-    <div x-show="isFinished">
-      <h2>Quiz terminé !</h2>
-      <p>Vous avez répondu correctement à <span x-text="correctCount"></span> questions sur 5.</p>
-      <button @click="restartQuiz()">Recommencer</button>
+    <!-- Conteneur pour afficher les coeurs pleins ou vides en fonction des bonnes réponses -->
+    <div class="hearts-container">
+      <!--boucle qui va itérer 5 fois et qui va génerer 5 images -->
+      <template x-for="i in 5" :key="i">
+        <img :src="i <= nbBonnesReponses ? 'image/coeur.jpg' : 'image/coeur_vide.png'" alt="coeur" class="heart">
+      </template>
     </div>
   </div>
 
+  <!-- Section qui s'affiche à la fin du quiz -->
+  <div x-show="estFini">
+    <h2>Quiz terminé !</h2>
+    <p>Vous avez répondu correctement à <span x-text="nbBonnesReponses"></span> questions sur 5.</p>
+    <button @click="recommencerQuiz()">Recommencer</button>
+  </div>
+</div>
   <script>
     function quizApp() {
       return {
@@ -174,48 +182,53 @@
           { question: 'Traduis "Chaton" en anglais.', correct: 'a', answers: ['Kitten', 'Lion', 'cat'] },
           { question: 'Traduis "Sourire" en anglais.', correct: 'c', answers: ['Rainbow', 'Cry', 'Smile'] },
         ],
-        currentQuestionIndex: 0,
-        selected: null,
-        correctCount: 0,
-	questionCount: 0,
-        isFinished: false,
-        get currentQuestion() {
-          return this.questions[this.currentQuestionIndex];
-          
-        },
-        selectAnswer(answer) {
-  if (!this.selected) {
-    this.selected = answer;
-    if (this.isCorrect(answer)) {
-      this.correctCount++; // Incrémente les bonnes réponses
-    }
-    this.questionCount++; // Incrémente le nombre de questions posées
+       // Initialisation de la question actuelle (par index), des réponses sélectionnées et des compteurs
+       indexQuestionActuelle: 0, // Index de la question actuelle
+        selectionnee: null,          // Réponse sélectionnée par l'utilisateur
+        nbBonnesReponses: 0,         // Nombre de réponses correctes
+        nbQuestionsPosees: 0,        // Nombre de questions posées
+        estFini: false,       // Indique si le quiz est terminé
 
-    // Condition d'arrêt : 5 bonnes réponses ou 10 questions posées
-    if (this.correctCount >= 5 || this.questionCount >= 10) {
-      this.isFinished = true;
-    }
-  }
-},
-
-        isCorrect(answer) {
-          return answer === this.currentQuestion.correct;
+        // Obtenir la question actuelle en fonction de l'index
+        get questionActuelle() {
+          return this.questions[this.indexQuestionActuelle];
         },
-        nextQuestion() {
-          this.selected = null;
-          this.currentQuestionIndex = Math.floor(Math.random() * this.questions.length);
-          if (this.currentQuestionIndex >= this.questions.length) {
-            this.isFinished = true;
+
+        // Fonction pour sélectionner une réponse
+        selectionnerReponse(reponse) {
+          if (!this.selectionnee) {
+            this.selectionnee = reponse; // Marque la réponse sélectionnée
+            if (this.estCorrect(reponse)) {
+              this.nbBonnesReponses++; // Incrémente les bonnes réponses si correct
+            }
+            this.nbQuestionsPosees++;  // Incrémente le nombre de questions posées
+
+            // Vérifie si le quiz est terminé (5 bonnes réponses ou 10 questions)
+            if (this.nbBonnesReponses >= 5 || this.nbQuestionsPosees >= 10) {
+              this.estFini = true;
+            }
           }
         },
-        restartQuiz() {
-	
-  	  this.questionCount = 0; // Réinitialise le compteur de questions
-          this.currentQuestionIndex = 0;
-          this.correctCount = 0;
-          this.selected = null;
-          this.isFinished = false;
-          this.nextQuestion()
+
+        // Vérifie si la réponse sélectionnée est correcte
+        estCorrect(reponse) {
+          return reponse === this.questionActuelle.correct;
+        },
+
+        // Sélectionne une nouvelle question aléatoire et réinitialise la réponse sélectionnée
+        questionSuivante() {
+          this.selectionnee = null;
+          this.indexQuestionActuelle = Math.floor(Math.random() * this.questions.length); // Choisit une question aléatoire
+        },
+
+        // Redémarre le quiz, réinitialise les compteurs et sélectionne une nouvelle question
+        recommencerQuiz() {
+          this.nbQuestionsPosees = 0; // Réinitialise le compteur de questions
+          this.indexQuestionActuelle = 0; // Réinitialise l'index de la question
+          this.nbBonnesReponses = 0; // Réinitialise le compteur de bonnes réponses
+          this.selectionnee = null; // Réinitialise la sélection
+          this.estFini = false; // Indique que le quiz n'est pas terminé
+          this.questionSuivante(); // Sélectionne une nouvelle question au démarrage
         }
       };
     }
