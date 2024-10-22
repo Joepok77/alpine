@@ -203,7 +203,7 @@
             }
             this.nbQuestionsPosees++;  // Incrémente le nombre de questions posées
 
-            // Vérifie si le quiz est terminé (5 bonnes réponses ou 10 questions)
+            
             if (this.nbBonnesReponses >= 5 || this.nbQuestionsPosees >= 10) {
               this.estFini = true;
             }
@@ -224,9 +224,9 @@
         // Redémarre le quiz, réinitialise les compteurs et sélectionne une nouvelle question
         recommencerQuiz() {
           this.nbQuestionsPosees = 0; // Réinitialise le compteur de questions
-          this.indexQuestionActuelle = 0; // Réinitialise l'index de la question
-          this.nbBonnesReponses = 0; // Réinitialise le compteur de bonnes réponses
-          this.selectionnee = null; // Réinitialise la sélection
+          this.indexQuestionActuelle = 0; 
+          this.nbBonnesReponses = 0; 
+          this.selectionnee = null; 
           this.estFini = false; // Indique que le quiz n'est pas terminé
           this.questionSuivante(); // Sélectionne une nouvelle question au démarrage
         }
